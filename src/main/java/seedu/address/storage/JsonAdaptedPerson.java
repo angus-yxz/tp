@@ -7,10 +7,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.Client;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -28,6 +31,8 @@ class JsonAdaptedPerson {
     private final String phone;
     private final String email;
     private final String address;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final String reference;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -36,14 +41,19 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("reference") String reference) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.reference = reference;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    public JsonAdaptedPerson(String name, String phone, String email, String address, List<JsonAdaptedTag> tags) {
+        this(name, phone, email, address, tags, null);
     }
 
     /**
@@ -54,6 +64,7 @@ class JsonAdaptedPerson {
         phone = source.getPhone().value;
         email = source.getEmail().value;
         address = source.getAddress().value;
+        reference = source instanceof Client client ? client.getReference().value : null;
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -68,6 +79,23 @@ class JsonAdaptedPerson {
         final List<Tag> personTags = new ArrayList<>();
         for (JsonAdaptedTag tag : tags) {
             personTags.add(tag.toModelType());
+        }
+
+        if (reference != null) {
+            if (!ClientReference.isValidReference(reference)) {
+                throw new IllegalValueException(ClientReference.MESSAGE_CONSTRAINTS);
+            }
+            if (name == null || phone == null || email == null || address == null) {
+                throw new IllegalValueException("Client contact details are incomplete.");
+            }
+            if (!personTags.isEmpty()) {
+                throw new IllegalValueException("Client records cannot contain tags.");
+            }
+            try {
+                return new Client(new ClientReference(reference), name, phone, email, address);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalValueException(e.getMessage());
+            }
         }
 
         if (name == null) {

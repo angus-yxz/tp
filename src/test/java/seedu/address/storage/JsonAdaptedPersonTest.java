@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.Client;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
@@ -36,6 +38,20 @@ public class JsonAdaptedPersonTest {
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
         JsonAdaptedPerson person = new JsonAdaptedPerson(BENSON);
         assertEquals(BENSON, person.toModelType());
+    }
+
+    @Test
+    public void toModelType_clientReferenceIsPreserved() throws Exception {
+        Client client = new Client(new ClientReference("C0001"), "Alex Yeoh", "87438807",
+                "alex@example.com", "Main St");
+        assertEquals(client, new JsonAdaptedPerson(client).toModelType());
+    }
+
+    @Test
+    public void toModelType_invalidClientReference_throwsIllegalValueException() {
+        JsonAdaptedPerson client = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL,
+                VALID_ADDRESS, VALID_TAGS, "1INVALID");
+        assertThrows(IllegalValueException.class, ClientReference.MESSAGE_CONSTRAINTS, client::toModelType);
     }
 
     @Test

@@ -29,6 +29,9 @@ public class Email {
             + "(-" + ALPHANUMERIC_NO_UNDERSCORE + ")*";
     private static final String DOMAIN_LAST_PART_REGEX = "(" + DOMAIN_PART_REGEX + "){2,}$"; // At least two chars
     private static final String DOMAIN_REGEX = "(" + DOMAIN_PART_REGEX + "\\.)*" + DOMAIN_LAST_PART_REGEX;
+    private static final String CLIENT_DOMAIN_LABEL = "[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?";
+    private static final String CLIENT_VALIDATION_REGEX =
+            "[^@\\s]+@(?:" + CLIENT_DOMAIN_LABEL + "\\.)+[A-Za-z]{2,}";
     public static final String VALIDATION_REGEX = LOCAL_PART_REGEX + "@" + DOMAIN_REGEX;
 
     public final String value;
@@ -42,6 +45,21 @@ public class Email {
         requireNonNull(email);
         checkArgument(isValidEmail(email), MESSAGE_CONSTRAINTS);
         value = email;
+    }
+
+    private Email(String email, boolean clientEmail) {
+        requireNonNull(email);
+        checkArgument(clientEmail && isValidClientEmail(email), Client.EMAIL_MESSAGE_CONSTRAINTS);
+        value = email;
+    }
+
+    /** Returns an email address validated for a client. */
+    public static Email forClient(String email) {
+        return new Email(requireNonNull(email).trim(), true);
+    }
+
+    public static boolean isValidClientEmail(String email) {
+        return email.matches(CLIENT_VALIDATION_REGEX);
     }
 
     /**

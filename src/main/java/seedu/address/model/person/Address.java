@@ -10,6 +10,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Address {
 
     public static final String MESSAGE_CONSTRAINTS = "Addresses can take any values, and should not be blank";
+    public static final String CLIENT_MESSAGE_CONSTRAINTS =
+            "Address must contain 1-200 printable characters on one line.";
 
     /*
      * The first character of the address must not be a whitespace,
@@ -28,6 +30,21 @@ public class Address {
         requireNonNull(address);
         checkArgument(isValidAddress(address), MESSAGE_CONSTRAINTS);
         value = address;
+    }
+
+    private Address(String address, boolean clientAddress) {
+        requireNonNull(address);
+        checkArgument(clientAddress && isValidClientAddress(address), CLIENT_MESSAGE_CONSTRAINTS);
+        value = address;
+    }
+
+    /** Returns an address validated for a client. */
+    public static Address forClient(String address) {
+        return new Address(requireNonNull(address).trim(), true);
+    }
+
+    public static boolean isValidClientAddress(String address) {
+        return address.matches("(?=.{1,200}$)(?=.*\\S)[^\\p{Cntrl}]+");
     }
 
     /**

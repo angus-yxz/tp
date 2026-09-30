@@ -12,6 +12,7 @@ public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
             "Phone numbers should only contain digits, and should be at least 3 digits long";
+    public static final String CLIENT_MESSAGE_CONSTRAINTS = "Phone number must contain 3-15 digits.";
     public static final String VALIDATION_REGEX = "\\d{3,}";
     public final String value;
 
@@ -24,6 +25,21 @@ public class Phone {
         requireNonNull(phone);
         checkArgument(isValidPhone(phone), MESSAGE_CONSTRAINTS);
         value = phone;
+    }
+
+    private Phone(String phone, boolean clientPhone) {
+        requireNonNull(phone);
+        checkArgument(clientPhone && isValidClientPhone(phone), CLIENT_MESSAGE_CONSTRAINTS);
+        value = phone;
+    }
+
+    /** Returns a phone number validated for a client. */
+    public static Phone forClient(String phone) {
+        return new Phone(requireNonNull(phone).trim(), true);
+    }
+
+    public static boolean isValidClientPhone(String phone) {
+        return phone.matches("[0-9]{3,15}");
     }
 
     /**

@@ -71,6 +71,7 @@ public class Person {
         }
 
         return otherPerson != null
+                && !(otherPerson instanceof Client)
                 && otherPerson.getName().equals(getName());
     }
 
@@ -85,9 +86,10 @@ public class Person {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof Person otherPerson)) {
+        if (other == null || other.getClass() != getClass()) {
             return false;
         }
+        Person otherPerson = (Person) other;
 
         return name.equals(otherPerson.name)
                 && phone.equals(otherPerson.phone)
