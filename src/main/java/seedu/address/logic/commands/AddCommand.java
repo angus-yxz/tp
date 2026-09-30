@@ -1,16 +1,12 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.person.Client;
 import seedu.address.model.person.Person;
 
 /**
@@ -19,21 +15,12 @@ import seedu.address.model.person.Person;
 public class AddCommand extends Command {
 
     public static final String COMMAND_WORD = "add";
+    public static final String CLIENT_FORMAT = "add r/REFERENCE n/NAME p/PHONE e/EMAIL a/ADDRESS";
+    public static final String MESSAGE_CLIENT_SUCCESS = "Added client: %1$s %2$s";
+    public static final String MESSAGE_DUPLICATE_CLIENT = "A client with reference %s already exists.";
+    public static final String MESSAGE_CLIENT_SAVE_FAILURE = "Unable to save client data. No client was added.";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a person to the address book. "
-            + "Parameters: "
-            + PREFIX_NAME + "NAME "
-            + PREFIX_PHONE + "PHONE "
-            + PREFIX_EMAIL + "EMAIL "
-            + PREFIX_ADDRESS + "ADDRESS "
-            + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Example: " + COMMAND_WORD + " "
-            + PREFIX_NAME + "John Doe "
-            + PREFIX_PHONE + "98765432 "
-            + PREFIX_EMAIL + "johnd@example.com "
-            + PREFIX_ADDRESS + "311, Clementi Ave 2, #02-25 "
-            + PREFIX_TAG + "friends "
-            + PREFIX_TAG + "owesMoney";
+    public static final String MESSAGE_USAGE = "Adds a client. Format: " + CLIENT_FORMAT;
 
     public static final String MESSAGE_SUCCESS = "New person added: %1$s";
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
@@ -48,15 +35,26 @@ public class AddCommand extends Command {
         toAdd = person;
     }
 
+    public Person getPersonToAdd() {
+        return toAdd;
+    }
+
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
 
         if (model.hasPerson(toAdd)) {
+            if (toAdd instanceof Client client) {
+                throw new CommandException(String.format(MESSAGE_DUPLICATE_CLIENT, client.getReference()));
+            }
             throw new CommandException(MESSAGE_DUPLICATE_PERSON);
         }
 
         model.addPerson(toAdd);
+        if (toAdd instanceof Client client) {
+            return new CommandResult(String.format(MESSAGE_CLIENT_SUCCESS,
+                    client.getReference(), client.getName()));
+        }
         return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(toAdd)));
     }
 

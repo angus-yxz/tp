@@ -43,8 +43,14 @@ public class ClientTest {
                 client("C0001", "Alex 2"));
         assertThrows(IllegalArgumentException.class, Phone.CLIENT_MESSAGE_CONSTRAINTS, () ->
                 new Client(new ClientReference("C0001"), "Alex", "12", "alex@example.com", "Main St"));
+        assertThrows(IllegalArgumentException.class, Phone.CLIENT_MESSAGE_CONSTRAINTS, () ->
+                new Client(new ClientReference("C0001"), "Alex", "1".repeat(16), "alex@example.com", "Main St"));
+        assertThrows(IllegalArgumentException.class, Client.EMAIL_MESSAGE_CONSTRAINTS, () ->
+                new Client(new ClientReference("C0001"), "Alex", "123", "alex@localhost", "Main St"));
         assertThrows(IllegalArgumentException.class, Address.CLIENT_MESSAGE_CONSTRAINTS, () ->
                 new Client(new ClientReference("C0001"), "Alex", "123", "alex@example.com", "\n"));
+        assertThrows(IllegalArgumentException.class, Address.CLIENT_MESSAGE_CONSTRAINTS, () ->
+                new Client(new ClientReference("C0001"), "Alex", "123", "alex@example.com", "A".repeat(201)));
     }
 
     private static Client client(String reference, String name) {

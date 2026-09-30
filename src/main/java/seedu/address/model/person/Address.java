@@ -44,7 +44,7 @@ public class Address {
     }
 
     public static boolean isValidClientAddress(String address) {
-        return address.matches("(?=.{1,200}$)(?=.*\\S)[^\\p{Cntrl}]+");
+        return address.matches("(?=.{1,200}$)(?=.*\\S)[^\\p{Cntrl}\\u2028\\u2029]+");
     }
 
     /**

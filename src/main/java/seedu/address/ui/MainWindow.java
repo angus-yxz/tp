@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
@@ -17,6 +18,8 @@ import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Client;
+import seedu.address.model.person.Person;
 
 /**
  * The Main Window. Provides the basic application layout containing
@@ -45,6 +48,9 @@ public class MainWindow extends UiPart<Stage> {
 
     @FXML
     private StackPane personListPanelPlaceholder;
+
+    @FXML
+    private Label clientDetails;
 
     @FXML
     private StackPane resultDisplayPlaceholder;
@@ -116,6 +122,9 @@ public class MainWindow extends UiPart<Stage> {
     void fillInnerParts() {
         personListPanel = new PersonListPanel(logic.getFilteredPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
+        personListPanel.selectedPersonProperty().addListener((observable, oldPerson, newPerson) ->
+                showClientDetails(newPerson));
+        personListPanel.selectFirst();
 
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
@@ -171,6 +180,18 @@ public class MainWindow extends UiPart<Stage> {
         return personListPanel;
     }
 
+    private void showClientDetails(Person person) {
+        if (person instanceof Client client) {
+            clientDetails.setText("Reference: " + client.getReference()
+                    + "\nName: " + client.getName()
+                    + "\nPhone: " + client.getPhone()
+                    + "\nEmail: " + client.getEmail()
+                    + "\nAddress: " + client.getAddress());
+        } else {
+            clientDetails.setText("");
+        }
+    }
+
     /**
      * Executes the command and returns the result.
      *
@@ -181,6 +202,9 @@ public class MainWindow extends UiPart<Stage> {
             CommandResult commandResult = logic.execute(commandText);
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
+            if (commandResult.getFeedbackToUser().startsWith("Added client: ")) {
+                personListPanel.selectLast();
+            }
 
             if (commandResult.isShowHelp()) {
                 handleHelp();

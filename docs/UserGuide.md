@@ -31,7 +31,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add r/C0001 n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds client `C0001`.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -76,20 +76,21 @@ Shows a message explaining how to access the help page.
 Format: `help`
 
 
-### Adding a person: `add`
+### Adding a client: `add`
 
-Adds a person to the address book.
+Adds a client with a unique reference and contact details. The five parameters are required and may appear in any order.
+References are case-insensitive and stored in uppercase. Clients may share names or contact details.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
+Format: `add r/REFERENCE n/NAME p/PHONE e/EMAIL a/ADDRESS`
 
 <box type="tip" seamless>
 
-**Tip:** A person can have any number of tags, including zero.
+**Tip:** A reference starts with a letter and can contain up to 20 letters, digits, or hyphens.
 </box>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add r/C0001 n/Alex Yeoh p/87438807 e/alex@example.com a/Blk 30 Geylang Street 29, #06-40`
+* `add n/Mary O'Connor e/mary.oconnor@example.com r/SG-1024 a/10 Main Street p/91234567`
 
 ### Listing all persons: `list`
 
@@ -195,7 +196,7 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add r/REFERENCE n/NAME p/PHONE e/EMAIL a/ADDRESS` <br> e.g., `add r/C0001 n/Alex Yeoh p/87438807 e/alex@example.com a/10 Main Street`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
