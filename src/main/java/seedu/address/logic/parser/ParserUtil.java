@@ -128,9 +128,14 @@ public class ParserUtil {
         return parseRequiredCardField(cvv, CardDetails.CVV_MESSAGE_CONSTRAINTS);
     }
 
-    /** Parses an expiry date without imposing a format. */
+    /** Parses an expiry date in MM/YY format with a valid month. */
     public static String parseExpiryDate(String expiryDate) throws ParseException {
-        return parseRequiredCardField(expiryDate, CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+        requireNonNull(expiryDate);
+        String trimmed = expiryDate.trim();
+        if (!CardDetails.isValidExpiryDate(trimmed)) {
+            throw new ParseException(CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+        }
+        return trimmed;
     }
 
     /** Parses a provider name. */

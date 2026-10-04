@@ -1,5 +1,6 @@
 package seedu.address.model.person;
 
+import static seedu.address.commons.util.AppUtil.checkArgument;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Objects;
@@ -8,7 +9,8 @@ import java.util.Objects;
 public final class CardDetails {
     public static final String CARD_NUMBER_MESSAGE_CONSTRAINTS = "Card number must not be blank.";
     public static final String CVV_MESSAGE_CONSTRAINTS = "CVV must not be blank.";
-    public static final String EXPIRY_DATE_MESSAGE_CONSTRAINTS = "Expiry date must not be blank.";
+    public static final String EXPIRY_DATE_MESSAGE_CONSTRAINTS =
+            "Expiry date must be in MM/YY format with a month from 01 to 12 (e.g. 12/28).";
     public static final String PROVIDER_MESSAGE_CONSTRAINTS = "Provider must not be blank.";
 
     private final String cardNumber;
@@ -21,7 +23,8 @@ public final class CardDetails {
         requireAllNonNull(cardNumber, cvv, expiryDate, provider);
         this.cardNumber = requireNonBlank(cardNumber, CARD_NUMBER_MESSAGE_CONSTRAINTS);
         this.cvv = requireNonBlank(cvv, CVV_MESSAGE_CONSTRAINTS);
-        this.expiryDate = requireNonBlank(expiryDate, EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+        checkArgument(isValidExpiryDate(expiryDate), EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+        this.expiryDate = expiryDate;
         this.provider = requireNonBlank(provider, PROVIDER_MESSAGE_CONSTRAINTS);
     }
 
@@ -30,6 +33,11 @@ public final class CardDetails {
             throw new IllegalArgumentException(message);
         }
         return value;
+    }
+
+    /** Checks the MM/YY format and month range; past expiry dates are allowed. */
+    public static boolean isValidExpiryDate(String value) {
+        return value != null && value.matches("(0[1-9]|1[0-2])/[0-9]{2}");
     }
 
     public String getCardNumber() {

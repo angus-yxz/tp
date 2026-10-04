@@ -84,6 +84,8 @@ The debt is stored with two decimal places; no currency is assigned.
 Card number, CVV, expiry date, and provider are required nonblank fields. They are saved as plain text;
 command input is trimmed at its edges. These new fields are stored when adding a person;
 viewing and editing them are not yet supported.
+Expiry dates must use `MM/YY`, with a month from `01` to `12` (e.g. `12/28`).
+This checks the format only; past expiry dates are accepted.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS cn/CARD_NUMBER cvv/CVV exp/EXPIRY_DATE provider/PROVIDER cs/CREDIT_SCORE d/DEBT [t/TAG]... `
 

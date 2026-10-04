@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.CardDetails;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
@@ -33,6 +34,22 @@ public class ParserUtilTest {
     private static final String VALID_TAG_2 = "neighbour";
 
     private static final String WHITESPACE = " \t\r\n";
+
+    @Test
+    public void parseExpiryDate_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseExpiryDate(null));
+    }
+
+    @Test
+    public void parseExpiryDate_invalidMonth_throwsParseException() {
+        assertThrows(ParseException.class, CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseExpiryDate("13/28"));
+    }
+
+    @Test
+    public void parseExpiryDate_validValueWithWhitespace_success() throws Exception {
+        assertEquals("12/28", ParserUtil.parseExpiryDate(WHITESPACE + "12/28" + WHITESPACE));
+    }
 
     @Test
     public void parseIndex_invalidInput_throwsParseException() {

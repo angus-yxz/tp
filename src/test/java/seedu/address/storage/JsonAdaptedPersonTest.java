@@ -130,6 +130,14 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_invalidExpiryDate_throwsIllegalValueException() {
+        JsonAdaptedCardDetails invalidCard = new JsonAdaptedCardDetails("4111111111111111", "123", "13/28", "Visa");
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                invalidCard, VALID_CREDIT_SCORE, VALID_DEBT, VALID_TAGS);
+        assertThrows(IllegalValueException.class, CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS, person::toModelType);
+    }
+
+    @Test
     public void toModelType_invalidCreditScore_throwsIllegalValueException() {
         JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
                 VALID_CARD_DETAILS, "-1", VALID_DEBT, VALID_TAGS);
