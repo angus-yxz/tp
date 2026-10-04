@@ -10,6 +10,9 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.CardDetails;
+import seedu.address.model.person.CreditScore;
+import seedu.address.model.person.Debt;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
@@ -93,6 +96,55 @@ public class ParserUtil {
             throw new ParseException(Email.MESSAGE_CONSTRAINTS);
         }
         return new Email(trimmedEmail);
+    }
+
+    /** Parses a nonnegative whole-number credit score. */
+    public static CreditScore parseCreditScore(String creditScore) throws ParseException {
+        requireNonNull(creditScore);
+        String trimmed = creditScore.trim();
+        if (!CreditScore.isValidCreditScore(trimmed)) {
+            throw new ParseException(CreditScore.MESSAGE_CONSTRAINTS);
+        }
+        return new CreditScore(trimmed);
+    }
+
+    /** Parses a nonnegative debt amount with at most two decimal places. */
+    public static Debt parseDebt(String debt) throws ParseException {
+        requireNonNull(debt);
+        String trimmed = debt.trim();
+        if (!Debt.isValidDebt(trimmed)) {
+            throw new ParseException(Debt.MESSAGE_CONSTRAINTS);
+        }
+        return new Debt(trimmed);
+    }
+
+    /** Parses a card number as plain text. */
+    public static String parseCardNumber(String cardNumber) throws ParseException {
+        return parseRequiredCardField(cardNumber, CardDetails.CARD_NUMBER_MESSAGE_CONSTRAINTS);
+    }
+
+    /** Parses a CVV as plain text. */
+    public static String parseCvv(String cvv) throws ParseException {
+        return parseRequiredCardField(cvv, CardDetails.CVV_MESSAGE_CONSTRAINTS);
+    }
+
+    /** Parses an expiry date without imposing a format. */
+    public static String parseExpiryDate(String expiryDate) throws ParseException {
+        return parseRequiredCardField(expiryDate, CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+    }
+
+    /** Parses a provider name. */
+    public static String parseProvider(String provider) throws ParseException {
+        return parseRequiredCardField(provider, CardDetails.PROVIDER_MESSAGE_CONSTRAINTS);
+    }
+
+    private static String parseRequiredCardField(String value, String message) throws ParseException {
+        requireNonNull(value);
+        String trimmed = value.trim();
+        if (trimmed.isBlank()) {
+            throw new ParseException(message);
+        }
+        return trimmed;
     }
 
     /**

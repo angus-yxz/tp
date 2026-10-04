@@ -12,7 +12,8 @@ import seedu.address.model.tag.Tag;
 
 /**
  * Represents a Person in the address book.
- * Guarantees: details are present and not null, field values are validated, immutable.
+ * Guarantees: contact details are present, field values are validated, immutable.
+ * Legacy profiles may have no card or financial details.
  */
 public class Person {
 
@@ -23,10 +24,13 @@ public class Person {
 
     // Data fields
     private final Address address;
+    private final CardDetails cardDetails;
+    private final CreditScore creditScore;
+    private final Debt debt;
     private final Set<Tag> tags = new HashSet<>();
 
     /**
-     * Every field must be present and not null.
+     * Creates a legacy profile without card or financial details.
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
         requireAllNonNull(name, phone, email, address, tags);
@@ -34,6 +38,25 @@ public class Person {
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.cardDetails = null;
+        this.creditScore = null;
+        this.debt = null;
+        this.tags.addAll(tags);
+    }
+
+    /**
+     * Every field must be present and not null.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, CardDetails cardDetails,
+            CreditScore creditScore, Debt debt, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, address, cardDetails, creditScore, debt, tags);
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        this.cardDetails = cardDetails;
+        this.creditScore = creditScore;
+        this.debt = debt;
         this.tags.addAll(tags);
     }
 
@@ -51,6 +74,21 @@ public class Person {
 
     public Address getAddress() {
         return address;
+    }
+
+    /** Returns the card details, or null for a legacy profile. */
+    public CardDetails getCardDetails() {
+        return cardDetails;
+    }
+
+    /** Returns the credit score, or null for a legacy profile. */
+    public CreditScore getCreditScore() {
+        return creditScore;
+    }
+
+    /** Returns the debt, or null for a legacy profile. */
+    public Debt getDebt() {
+        return debt;
     }
 
     /**
@@ -93,13 +131,16 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
+                && Objects.equals(cardDetails, otherPerson.cardDetails)
+                && Objects.equals(creditScore, otherPerson.creditScore)
+                && Objects.equals(debt, otherPerson.debt)
                 && tags.equals(otherPerson.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, cardDetails, creditScore, debt, tags);
     }
 
     @Override

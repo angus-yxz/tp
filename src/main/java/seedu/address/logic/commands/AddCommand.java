@@ -2,9 +2,15 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_CARD_NUMBER;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_CREDIT_SCORE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_CVV;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_DEBT;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_EXPIRY_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PROVIDER;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -26,12 +32,24 @@ public class AddCommand extends Command {
             + PREFIX_PHONE + "PHONE "
             + PREFIX_EMAIL + "EMAIL "
             + PREFIX_ADDRESS + "ADDRESS "
+            + PREFIX_CARD_NUMBER + "CARD_NUMBER "
+            + PREFIX_CVV + "CVV "
+            + PREFIX_EXPIRY_DATE + "EXPIRY_DATE "
+            + PREFIX_PROVIDER + "PROVIDER "
+            + PREFIX_CREDIT_SCORE + "CREDIT_SCORE "
+            + PREFIX_DEBT + "DEBT "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "John Doe "
             + PREFIX_PHONE + "98765432 "
             + PREFIX_EMAIL + "johnd@example.com "
             + PREFIX_ADDRESS + "311, Clementi Ave 2, #02-25 "
+            + PREFIX_CARD_NUMBER + "4111111111111111 "
+            + PREFIX_CVV + "123 "
+            + PREFIX_EXPIRY_DATE + "12/28 "
+            + PREFIX_PROVIDER + "Visa "
+            + PREFIX_CREDIT_SCORE + "700 "
+            + PREFIX_DEBT + "1250.50 "
             + PREFIX_TAG + "friends "
             + PREFIX_TAG + "owesMoney";
 

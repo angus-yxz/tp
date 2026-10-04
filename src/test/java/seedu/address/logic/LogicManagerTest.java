@@ -1,9 +1,13 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.CARD_DETAILS_DESC;
+import static seedu.address.logic.commands.CommandTestUtil.CREDIT_SCORE_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.DEBT_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
@@ -12,6 +16,7 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +73,38 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_addToLegacyAddressBook_preservesProfilesAfterEditAndReload() throws Exception {
+        Path dataPath = temporaryFolder.resolve("legacyAddressBook.json");
+        Files.writeString(dataPath, """
+                {"persons": [{"name": "Legacy Person", "phone": "12345",
+                "email": "legacy@example.com", "address": "Old Address", "tags": []}]}
+                """);
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(dataPath);
+        Model loadedModel = new ModelManager(addressBookStorage.readAddressBook().orElseThrow(), new UserPrefs());
+        Logic loadedLogic = new LogicManager(loadedModel, new StorageManager(addressBookStorage,
+                new JsonUserPrefsStorage(temporaryFolder.resolve("legacyPrefs.json"))));
+
+        loadedLogic.execute("list");
+        assertEquals(1, addressBookStorage.readAddressBook().orElseThrow().getPersonList().size());
+        loadedLogic.execute("edit 1 p/54321");
+        Person legacyPerson = loadedModel.getFilteredPersonList().get(0);
+        assertNull(legacyPerson.getCardDetails());
+        assertNull(legacyPerson.getCreditScore());
+        assertNull(legacyPerson.getDebt());
+
+        loadedLogic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY
+                + ADDRESS_DESC_AMY + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_AMY + DEBT_DESC_AMY);
+        Person createdPerson = loadedModel.getFilteredPersonList().get(1);
+        assertEquals(new PersonBuilder(AMY).withTags().build(), createdPerson);
+
+        loadedLogic.execute("edit 2 p/87654321");
+        Person expectedEditedPerson = new PersonBuilder(createdPerson).withPhone("87654321").build();
+        ReadOnlyAddressBook reloaded = addressBookStorage.readAddressBook().orElseThrow();
+        assertEquals(legacyPerson, reloaded.getPersonList().get(0));
+        assertEquals(expectedEditedPerson, reloaded.getPersonList().get(1));
     }
 
     @Test
@@ -165,7 +202,7 @@ public class LogicManagerTest {
 
         // Triggers the saveAddressBook method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_AMY + DEBT_DESC_AMY;
         Person expectedPerson = new PersonBuilder(AMY).withTags().build();
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
