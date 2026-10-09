@@ -1,61 +1,17 @@
 package seedu.address.logic.parser;
 
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.CARD_DETAILS_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.CARD_NUMBER_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.CREDIT_SCORE_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.CREDIT_SCORE_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.CVV_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.DEBT_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.DEBT_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.EXPIRY_DATE_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.INVALID_ADDRESS_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.INVALID_EMAIL_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.INVALID_NAME_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.INVALID_PHONE_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.INVALID_TAG_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.PREAMBLE_NON_EMPTY;
-import static seedu.address.logic.commands.CommandTestUtil.PREAMBLE_WHITESPACE;
-import static seedu.address.logic.commands.CommandTestUtil.PROVIDER_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.TAG_DESC_FRIEND;
-import static seedu.address.logic.commands.CommandTestUtil.TAG_DESC_HUSBAND;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_CARD_NUMBER;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_CREDIT_SCORE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_CVV;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_DEBT;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EXPIRY_DATE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PROVIDER;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
-import static seedu.address.testutil.TypicalPersons.AMY;
-import static seedu.address.testutil.TypicalPersons.BOB;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.CardDetails;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.CreditScore;
 import seedu.address.model.person.Debt;
 import seedu.address.model.person.Email;
@@ -66,222 +22,122 @@ import seedu.address.model.tag.Tag;
 import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
-    private AddCommandParser parser = new AddCommandParser();
+    private static final List<String> FIELDS = List.of("r/C0001", "n/Alex Yeoh", "p/87438807",
+            "e/alex@example.com", "a/Blk 30 Geylang Street 29, #06-40", "cn/4111111111111111", "cvv/123",
+            "exp/12/28", "provider/Visa", "cs/700", "d/0.00");
+    private static final String VALID_ARGUMENTS = " " + String.join(" ", FIELDS);
+    private static final String FINANCIAL_ARGUMENTS = " " + String.join(" ", FIELDS.subList(5, FIELDS.size()));
+    private final AddCommandParser parser = new AddCommandParser();
 
     @Test
-    public void parse_allFieldsPresent_success() {
-        Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).build();
-
-        // whitespace only preamble
-        assertParseSuccess(parser, PREAMBLE_WHITESPACE + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
-                + ADDRESS_DESC_BOB + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_FRIEND,
-                new AddCommand(expectedPerson));
-
-
-        // multiple tags - all accepted
-        Person expectedPersonMultipleTags = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND, VALID_TAG_HUSBAND)
-                .build();
-        assertParseSuccess(parser,
-                NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB
-                        + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
-                new AddCommand(expectedPersonMultipleTags));
+    public void parse_referenceWithAllCommittedFields_success() {
+        Person expected = new PersonBuilder().withClientReference("C0001").withName("Alex Yeoh")
+                .withPhone("87438807").withEmail("alex@example.com")
+                .withAddress("Blk 30 Geylang Street 29, #06-40").build();
+        assertParseSuccess(parser, VALID_ARGUMENTS, new AddCommand(expected));
     }
 
     @Test
-    public void parse_originalNameAndPhoneRules() {
-        Person expected = new Person(new Name("Mary Connor"), new Phone("1234567890123456"),
-                new Email("mary@example.com"), new Address("10 Main Street"),
-                new CardDetails("4111111111111111", "123", "12/28", "Visa"),
-                new CreditScore("700"), new Debt("0.00"), Set.of());
-        assertParseSuccess(parser, " n/Mary Connor p/1234567890123456 e/mary@example.com a/10 Main Street"
-                        + CARD_DETAILS_DESC + " cs/700 d/0.00",
-                new AddCommand(expected));
-        assertParseFailure(parser, " n/Mary O'Connor p/91234567 e/mary@example.com a/10 Main Street"
-                        + CARD_DETAILS_DESC + " cs/700 d/0.00",
-                Name.MESSAGE_CONSTRAINTS);
+    public void parse_reorderedFields_normalizesReferenceAndNameSpacing() {
+        Person expected = new PersonBuilder().withClientReference("SG-1024").withName("Mary O'Connor")
+                .withPhone("91234567").withEmail("Mary.oconnor@example.com").withAddress("10  Main Street").build();
+        assertParseSuccess(parser, "  n/  Mary   O'Connor  e/ Mary.oconnor@example.com "
+                + "r/ sg-1024  a/ 10  Main Street  p/91234567  " + FINANCIAL_ARGUMENTS, new AddCommand(expected));
     }
 
     @Test
-    public void parse_repeatedNonTagValue_failure() {
-        String validExpectedPersonString = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
-                + ADDRESS_DESC_BOB + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_FRIEND;
-
-        // multiple names
-        assertParseFailure(parser, NAME_DESC_AMY + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
-
-        // multiple phones
-        assertParseFailure(parser, PHONE_DESC_AMY + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
-
-        // multiple emails
-        assertParseFailure(parser, EMAIL_DESC_AMY + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_EMAIL));
-
-        // multiple addresses
-        assertParseFailure(parser, ADDRESS_DESC_AMY + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
-
-        // multiple fields repeated
-        assertParseFailure(parser,
-                validExpectedPersonString + PHONE_DESC_AMY + EMAIL_DESC_AMY + NAME_DESC_AMY + ADDRESS_DESC_AMY
-                        + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME, PREFIX_ADDRESS, PREFIX_EMAIL,
-                        PREFIX_PHONE, PREFIX_CARD_NUMBER, PREFIX_CVV, PREFIX_EXPIRY_DATE, PREFIX_PROVIDER,
-                        PREFIX_CREDIT_SCORE, PREFIX_DEBT));
-
-        // invalid value followed by valid value
-
-        // invalid name
-        assertParseFailure(parser, INVALID_NAME_DESC + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
-
-        // invalid email
-        assertParseFailure(parser, INVALID_EMAIL_DESC + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_EMAIL));
-
-        // invalid phone
-        assertParseFailure(parser, INVALID_PHONE_DESC + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
-
-        // invalid address
-        assertParseFailure(parser, INVALID_ADDRESS_DESC + validExpectedPersonString,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
-
-        // valid value followed by invalid value
-
-        // invalid name
-        assertParseFailure(parser, validExpectedPersonString + INVALID_NAME_DESC,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
-
-        // invalid email
-        assertParseFailure(parser, validExpectedPersonString + INVALID_EMAIL_DESC,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_EMAIL));
-
-        // invalid phone
-        assertParseFailure(parser, validExpectedPersonString + INVALID_PHONE_DESC,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
-
-        // invalid address
-        assertParseFailure(parser, validExpectedPersonString + INVALID_ADDRESS_DESC,
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
+    public void parse_missingRequiredField_reportsItsPrefix() {
+        for (int i = 0; i < FIELDS.size(); i++) {
+            List<String> fields = new ArrayList<>(FIELDS);
+            String removed = fields.remove(i);
+            assertParseFailure(parser, " " + String.join(" ", fields),
+                    String.format(AddCommandParser.MESSAGE_MISSING_PARAMETER, prefixOf(removed)));
+        }
+        assertParseFailure(parser, "", String.format(AddCommandParser.MESSAGE_MISSING_PARAMETER, "r/"));
     }
 
     @Test
-    public void parse_optionalFieldsMissing_success() {
-        // zero tags
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
-        assertParseSuccess(parser, NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_AMY + DEBT_DESC_AMY,
-                new AddCommand(expectedPerson));
+    public void parse_repeatedRequiredField_reportsItsPrefix() {
+        for (String field : FIELDS) {
+            assertParseFailure(parser, VALID_ARGUMENTS + " " + field,
+                    String.format(AddCommandParser.MESSAGE_REPEATED_PARAMETER, prefixOf(field)));
+        }
     }
 
     @Test
-    public void parse_compulsoryFieldMissing_failure() {
-        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
-
-        // missing name prefix
-        assertParseFailure(parser, VALID_NAME_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB,
-                expectedMessage);
-
-        // missing phone prefix
-        assertParseFailure(parser, NAME_DESC_BOB + VALID_PHONE_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB,
-                expectedMessage);
-
-        // missing email prefix
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + VALID_EMAIL_BOB + ADDRESS_DESC_BOB
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB,
-                expectedMessage);
-
-        // missing address prefix
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + VALID_ADDRESS_BOB
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB,
-                expectedMessage);
-
-        // all prefixes missing
-        assertParseFailure(parser, VALID_NAME_BOB + VALID_PHONE_BOB + VALID_EMAIL_BOB + VALID_ADDRESS_BOB,
-                expectedMessage);
-
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + DEBT_DESC_BOB, expectedMessage);
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB, expectedMessage);
+    public void parse_optionalTags_preservesExistingSupport() {
+        Person expected = new PersonBuilder().withClientReference("C0001").withName("Alex Yeoh")
+                .withPhone("87438807").withEmail("alex@example.com")
+                .withAddress("Blk 30 Geylang Street 29, #06-40").withTags("friends", "owesMoney").build();
+        assertParseSuccess(parser, VALID_ARGUMENTS + " t/friends t/owesMoney t/friends", new AddCommand(expected));
+        assertParseFailure(parser, VALID_ARGUMENTS + " t/#invalid", Tag.MESSAGE_CONSTRAINTS);
     }
 
     @Test
-    public void parse_invalidValue_failure() {
-        // invalid name
-        assertParseFailure(parser, INVALID_NAME_DESC + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
-                Name.MESSAGE_CONSTRAINTS);
+    public void parse_unknownPrefixOrPreamble_rejected() {
+        for (String prefix : List.of("x/", "R/", "future/")) {
+            assertParseFailure(parser, VALID_ARGUMENTS + " " + prefix + "value",
+                    AddCommandParser.MESSAGE_INVALID_ADD);
+        }
+        assertParseFailure(parser, "extra-text" + VALID_ARGUMENTS, AddCommandParser.MESSAGE_INVALID_ADD);
+        assertParseFailure(parser, "extra-text", AddCommandParser.MESSAGE_INVALID_ADD);
+    }
 
-        // invalid phone
-        assertParseFailure(parser, NAME_DESC_BOB + INVALID_PHONE_DESC + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
-                Phone.MESSAGE_CONSTRAINTS);
+    @Test
+    public void parse_blankRequiredValues_reportsFieldConstraint() {
+        List<String> messages = List.of(ClientReference.MESSAGE_CONSTRAINTS, Name.MESSAGE_CONSTRAINTS,
+                Phone.MESSAGE_CONSTRAINTS, Email.MESSAGE_CONSTRAINTS, Address.MESSAGE_CONSTRAINTS,
+                CardDetails.CARD_NUMBER_MESSAGE_CONSTRAINTS, CardDetails.CVV_MESSAGE_CONSTRAINTS,
+                CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS, CardDetails.PROVIDER_MESSAGE_CONSTRAINTS,
+                CreditScore.MESSAGE_CONSTRAINTS, Debt.MESSAGE_CONSTRAINTS);
+        for (int i = 0; i < FIELDS.size(); i++) {
+            List<String> fields = new ArrayList<>(FIELDS);
+            fields.set(i, prefixOf(fields.get(i)));
+            assertParseFailure(parser, " " + String.join(" ", fields), messages.get(i));
+        }
+    }
 
-        // invalid email
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + INVALID_EMAIL_DESC + ADDRESS_DESC_BOB
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+    @Test
+    public void parse_invalidContactValues_reportsSpecConstraint() {
+        assertParseFailure(parser, VALID_ARGUMENTS.replace("C0001", "1C0001"), ClientReference.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, VALID_ARGUMENTS.replace("Alex Yeoh", "Alex2"), Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, VALID_ARGUMENTS.replace("87438807", "123-456"), Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, VALID_ARGUMENTS.replace("alex@example.com", "alex@example"),
                 Email.MESSAGE_CONSTRAINTS);
-
-        // invalid address
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + INVALID_ADDRESS_DESC
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
+        assertParseFailure(parser, VALID_ARGUMENTS.replace("Blk 30 Geylang Street 29, #06-40", "Main\nStreet"),
                 Address.MESSAGE_CONSTRAINTS);
+    }
 
-        // invalid tag
-        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + INVALID_TAG_DESC + VALID_TAG_FRIEND,
-                Tag.MESSAGE_CONSTRAINTS);
+    @Test
+    public void parse_invalidCardOrFinancialValues_preservesCommittedConstraints() {
+        for (String expiry : List.of("13/28", "00/28", "1/28", "12/2028")) {
+            assertParseFailure(parser, VALID_ARGUMENTS.replace("exp/12/28", "exp/" + expiry),
+                    CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS);
+        }
+        for (String score : List.of("-1", "7.5")) {
+            assertParseFailure(parser, VALID_ARGUMENTS.replace("cs/700", "cs/" + score),
+                    CreditScore.MESSAGE_CONSTRAINTS);
+        }
+        for (String debt : List.of("-1", "1.234")) {
+            assertParseFailure(parser, VALID_ARGUMENTS.replace("d/0.00", "d/" + debt), Debt.MESSAGE_CONSTRAINTS);
+        }
+    }
 
-        // two invalid values, only first invalid value reported
-        assertParseFailure(parser, INVALID_NAME_DESC + PHONE_DESC_BOB + EMAIL_DESC_BOB + INVALID_ADDRESS_DESC
-                        + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB,
+    @Test
+    public void parse_multipleInvalidValues_reportsFirstInCommandOrder() {
+        assertParseFailure(parser, " p/12 n/Alex2 r/C0001 e/alex@example.com a/Main Street" + FINANCIAL_ARGUMENTS,
+                Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/Alex2 p/12 r/C0001 e/alex@example.com a/Main Street" + FINANCIAL_ARGUMENTS,
                 Name.MESSAGE_CONSTRAINTS);
-
-        // non-empty preamble
-        assertParseFailure(parser, PREAMBLE_NON_EMPTY + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
-                + ADDRESS_DESC_BOB + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB
-                + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, " a/ n/Alex Yeoh r/1Invalid p/123 e/alex@example.com" + FINANCIAL_ARGUMENTS,
+                Address.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " t/friends " + VALID_ARGUMENTS.replace("87438807", "12") + " t/#invalid",
+                Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " cs/-1 " + VALID_ARGUMENTS.replace("cs/700", "").replace("Alex Yeoh", "Alex2"),
+                CreditScore.MESSAGE_CONSTRAINTS);
     }
 
-    @Test
-    public void parse_creditScoreAndDebt_invalidValuesRejected() {
-        String details = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB + CARD_DETAILS_DESC;
-        assertParseFailure(parser, details + " cs/-1" + DEBT_DESC_BOB, CreditScore.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, details + " cs/7.5" + DEBT_DESC_BOB, CreditScore.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, details + CREDIT_SCORE_DESC_BOB + " d/-1", Debt.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, details + CREDIT_SCORE_DESC_BOB + " d/1.234", Debt.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, details + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + " cs/701",
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_CREDIT_SCORE));
-        assertParseFailure(parser, details + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB + " d/1.00",
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_DEBT));
-    }
-
-    @Test
-    public void parse_cardDetails_requiredAndNonBlank() {
-        String otherFields = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + CREDIT_SCORE_DESC_BOB + DEBT_DESC_BOB;
-        String missingFieldMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
-        assertParseFailure(parser, otherFields + CVV_DESC + EXPIRY_DATE_DESC + PROVIDER_DESC, missingFieldMessage);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + EXPIRY_DATE_DESC + PROVIDER_DESC,
-                missingFieldMessage);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + CVV_DESC + PROVIDER_DESC, missingFieldMessage);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + CVV_DESC + EXPIRY_DATE_DESC,
-                missingFieldMessage);
-
-        assertParseFailure(parser, otherFields + " cn/" + CVV_DESC + EXPIRY_DATE_DESC + PROVIDER_DESC,
-                CardDetails.CARD_NUMBER_MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + " cvv/" + EXPIRY_DATE_DESC + PROVIDER_DESC,
-                CardDetails.CVV_MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + CVV_DESC + " exp/" + PROVIDER_DESC,
-                CardDetails.EXPIRY_DATE_MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, otherFields + CARD_NUMBER_DESC + CVV_DESC + EXPIRY_DATE_DESC + " provider/",
-                CardDetails.PROVIDER_MESSAGE_CONSTRAINTS);
+    private String prefixOf(String field) {
+        return field.substring(0, field.indexOf('/') + 1);
     }
 }

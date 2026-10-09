@@ -19,6 +19,34 @@ import seedu.address.testutil.PersonBuilder;
 public class PersonTest {
 
     @Test
+    public void isSamePerson_referencedClients_usesOnlyNormalizedReference() {
+        Person client = new PersonBuilder(ALICE).withClientReference("C0001").build();
+        Person sameReference = new PersonBuilder(BOB).withClientReference("c0001").build();
+        Person sameDetails = new PersonBuilder(client).withClientReference("C0002").build();
+        assertTrue(client.isSamePerson(sameReference));
+        assertTrue(sameReference.isSamePerson(client));
+        assertFalse(client.isSamePerson(sameDetails));
+        assertFalse(client.equals(sameDetails));
+        assertFalse(client.isSamePerson(null));
+    }
+
+    @Test
+    public void isSamePerson_legacyRecordAndReferencedClient_areDistinct() {
+        Person client = new PersonBuilder(ALICE).withClientReference("C0001").build();
+        assertFalse(client.isSamePerson(ALICE));
+        assertFalse(ALICE.isSamePerson(client));
+    }
+
+    @Test
+    public void equals_referencedClients_includesReferenceInEqualityAndHash() {
+        Person client = new PersonBuilder(ALICE).withClientReference("C0001").build();
+        Person sameClient = new PersonBuilder(client).withClientReference("c0001").build();
+        assertEquals(client, sameClient);
+        assertEquals(client.hashCode(), sameClient.hashCode());
+        assertFalse(client.equals(new PersonBuilder(client).withClientReference("C0002").build()));
+    }
+
+    @Test
     public void asObservableList_modifyList_throwsUnsupportedOperationException() {
         Person person = new PersonBuilder().build();
         assertThrows(UnsupportedOperationException.class, () -> person.getTags().remove(0));

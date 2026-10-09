@@ -101,6 +101,11 @@ public class EditCommand extends Command {
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
 
+        if (personToEdit.getClientReference() != null) {
+            return new Person(personToEdit.getClientReference(), updatedName, updatedPhone, updatedEmail,
+                    updatedAddress, personToEdit.getCardDetails(), personToEdit.getCreditScore(),
+                    personToEdit.getDebt(), updatedTags);
+        }
         if (personToEdit.getCardDetails() == null) {
             return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
         }

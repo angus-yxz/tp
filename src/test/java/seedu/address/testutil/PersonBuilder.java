@@ -5,6 +5,7 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.CardDetails;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.CreditScore;
 import seedu.address.model.person.Debt;
 import seedu.address.model.person.Email;
@@ -31,6 +32,7 @@ public class PersonBuilder {
     public static final String DEFAULT_DEBT = "0.00";
 
     private Name name;
+    private ClientReference clientReference;
     private Phone phone;
     private Email email;
     private Address address;
@@ -57,6 +59,7 @@ public class PersonBuilder {
      * Initializes the PersonBuilder with the data of {@code personToCopy}.
      */
     public PersonBuilder(Person personToCopy) {
+        clientReference = personToCopy.getClientReference();
         name = personToCopy.getName();
         phone = personToCopy.getPhone();
         email = personToCopy.getEmail();
@@ -125,8 +128,19 @@ public class PersonBuilder {
         return this;
     }
 
-    /** Builds a person, preserving absent details when copying a legacy profile. */
+    /**
+     * Sets the reference when building a US01 client.
+     */
+    public PersonBuilder withClientReference(String reference) {
+        clientReference = new ClientReference(reference);
+        return this;
+    }
+
+    /** Builds a US01 client or an existing record with its original financial details. */
     public Person build() {
+        if (clientReference != null) {
+            return new Person(clientReference, name, phone, email, address, cardDetails, creditScore, debt, tags);
+        }
         if (cardDetails == null && creditScore == null && debt == null) {
             return new Person(name, phone, email, address, tags);
         }

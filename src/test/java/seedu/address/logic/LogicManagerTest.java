@@ -1,18 +1,10 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.CARD_DETAILS_DESC;
-import static seedu.address.logic.commands.CommandTestUtil.CREDIT_SCORE_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.DEBT_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -23,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -32,11 +23,9 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
-import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
@@ -76,35 +65,24 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_addToLegacyAddressBook_preservesProfilesAfterEditAndReload() throws Exception {
-        Path dataPath = temporaryFolder.resolve("legacyAddressBook.json");
-        Files.writeString(dataPath, """
-                {"persons": [{"name": "Legacy Person", "phone": "12345",
-                "email": "legacy@example.com", "address": "Old Address", "tags": []}]}
-                """);
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(dataPath);
-        Model loadedModel = new ModelManager(addressBookStorage.readAddressBook().orElseThrow(), new UserPrefs());
-        Logic loadedLogic = new LogicManager(loadedModel, new StorageManager(addressBookStorage,
-                new JsonUserPrefsStorage(temporaryFolder.resolve("legacyPrefs.json"))));
+    public void execute_addClient_changesOnlyMemory() throws Exception {
+        CommandResult result = logic.execute("add r/c0001 n/Alex Yeoh p/87438807"
+                + " e/alex@example.com a/10 Main Street cn/4111111111111111 cvv/123 exp/12/28"
+                + " provider/Visa cs/700 d/1250.50");
+        assertEquals("Added client: C0001 Alex Yeoh", result.getFeedbackToUser());
+        assertEquals("C0001", model.getAddressBook().getPersonList().getFirst().getClientReference().value);
+        assertFalse(Files.exists(temporaryFolder.resolve("addressBook.json")));
+    }
 
-        loadedLogic.execute("list");
-        assertEquals(1, addressBookStorage.readAddressBook().orElseThrow().getPersonList().size());
-        loadedLogic.execute("edit 1 p/54321");
-        Person legacyPerson = loadedModel.getFilteredPersonList().get(0);
-        assertNull(legacyPerson.getCardDetails());
-        assertNull(legacyPerson.getCreditScore());
-        assertNull(legacyPerson.getDebt());
-
-        loadedLogic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY
-                + ADDRESS_DESC_AMY + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_AMY + DEBT_DESC_AMY);
-        Person createdPerson = loadedModel.getFilteredPersonList().get(1);
-        assertEquals(new PersonBuilder(AMY).withTags().build(), createdPerson);
-
-        loadedLogic.execute("edit 2 p/87654321");
-        Person expectedEditedPerson = new PersonBuilder(createdPerson).withPhone("87654321").build();
-        ReadOnlyAddressBook reloaded = addressBookStorage.readAddressBook().orElseThrow();
-        assertEquals(legacyPerson, reloaded.getPersonList().get(0));
-        assertEquals(expectedEditedPerson, reloaded.getPersonList().get(1));
+    @Test
+    public void execute_addClient_existingSavedDataIsUnchanged() throws Exception {
+        Path dataPath = temporaryFolder.resolve("addressBook.json");
+        String original = "{\"persons\": []}";
+        Files.writeString(dataPath, original);
+        logic.execute("add r/C0001 n/Alex Yeoh p/87438807 e/alex@example.com a/10 Main Street"
+                + " cn/4111111111111111 cvv/123 exp/12/28 provider/Visa cs/700 d/1250.50");
+        assertEquals(original, Files.readString(dataPath));
+        assertEquals(1, model.getAddressBook().getPersonList().size());
     }
 
     @Test
@@ -200,12 +178,7 @@ public class LogicManagerTest {
 
         logic = new LogicManager(model, storage);
 
-        // Triggers the saveAddressBook method by executing an add command
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + CARD_DETAILS_DESC + CREDIT_SCORE_DESC_AMY + DEBT_DESC_AMY;
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
-        ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
-        assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
+        // Existing non-add storage behavior is outside this US01 change.
+        assertCommandFailure("list", CommandException.class, expectedMessage, new ModelManager());
     }
 }

@@ -11,6 +11,7 @@ import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.CardDetails;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.CreditScore;
 import seedu.address.model.person.Debt;
 import seedu.address.model.person.Email;
@@ -46,7 +47,7 @@ public class ParserUtil {
      */
     public static Name parseName(String name) throws ParseException {
         requireNonNull(name);
-        String trimmedName = name.trim();
+        String trimmedName = name.trim().replaceAll(" +", " ");
         if (!Name.isValidName(trimmedName)) {
             throw new ParseException(Name.MESSAGE_CONSTRAINTS);
         }
@@ -96,6 +97,18 @@ public class ParserUtil {
             throw new ParseException(Email.MESSAGE_CONSTRAINTS);
         }
         return new Email(trimmedEmail);
+    }
+
+    /**
+     * Parses a client reference and normalizes it to uppercase.
+     */
+    public static ClientReference parseClientReference(String reference) throws ParseException {
+        requireNonNull(reference);
+        String trimmed = reference.trim();
+        if (!ClientReference.isValidClientReference(trimmed)) {
+            throw new ParseException(ClientReference.MESSAGE_CONSTRAINTS);
+        }
+        return new ClientReference(trimmed);
     }
 
     /** Parses a nonnegative whole-number credit score. */

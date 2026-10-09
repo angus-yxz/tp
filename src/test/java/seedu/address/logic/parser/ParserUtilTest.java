@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.CardDetails;
+import seedu.address.model.person.ClientReference;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
@@ -34,6 +35,23 @@ public class ParserUtilTest {
     private static final String VALID_TAG_2 = "neighbour";
 
     private static final String WHITESPACE = " \t\r\n";
+
+    @Test
+    public void parseClientReference_validValue_trimsAndNormalizesCase() throws Exception {
+        assertEquals(new ClientReference("SG-1024"), ParserUtil.parseClientReference("  sg-1024  "));
+    }
+
+    @Test
+    public void parseClientReference_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, ClientReference.MESSAGE_CONSTRAINTS, ()
+                -> ParserUtil.parseClientReference("123"));
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseClientReference(null));
+    }
+
+    @Test
+    public void parseName_repeatedSpaces_collapsesSpacingAndPreservesCapitalization() throws Exception {
+        assertEquals(new Name("Mary O'Connor-Smith"), ParserUtil.parseName("  Mary   O'Connor-Smith  "));
+    }
 
     @Test
     public void parseExpiryDate_null_throwsNullPointerException() {
